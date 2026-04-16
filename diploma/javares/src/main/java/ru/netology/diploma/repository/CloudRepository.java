@@ -1,0 +1,37 @@
+package ru.netology.diploma.repository;
+
+
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+@Repository
+public class CloudRepository {
+
+    private final NamedParameterJdbcTemplate jdbcTemplate;
+
+    public CloudRepository(NamedParameterJdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    public List<String> getAllFiles(Long userId) {
+
+        Map params = Map.of("param1", "value1");
+        String sql = "SELECT CURRENT_TIMESTAMP current_ts;";
+
+        List<String> answer = jdbcTemplate.query(sql, (rs, rowNum) -> {
+            String currentTS = rs.getString("current_ts");
+            return currentTS;
+        });
+        Logger.getLogger("rrrrrrrrrrrrrrrrrrrr").log(Level.INFO,"aaaaaaaaaaaaaaaaaaaaa");
+        return answer;
+
+//        List<String> examleList = List.of("monday", "tuesday", "wednesday");
+//        return examleList;
+    }
+
+}

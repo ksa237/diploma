@@ -35,7 +35,7 @@ public class CloudController {
         Map<String, String> response = Map.of("auth-token", "my-token-manafaka");
 
         return ResponseEntity.ok(response);
-       
+
     }
 
 }
