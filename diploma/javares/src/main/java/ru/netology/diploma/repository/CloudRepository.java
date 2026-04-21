@@ -27,11 +27,20 @@ public class CloudRepository {
             String currentTS = rs.getString("current_ts");
             return currentTS;
         });
-        Logger.getLogger("rrrrrrrrrrrrrrrrrrrr").log(Level.INFO,"aaaaaaaaaaaaaaaaaaaaa");
-        return answer;
 
-//        List<String> examleList = List.of("monday", "tuesday", "wednesday");
-//        return examleList;
+        return answer;
     }
 
+    public Boolean isSuccessAuthorization(Map<String, String> authData) {
+
+        String login = authData.get("login");
+        String password = authData.get("password");
+
+        Map params = Map.of("email", login, "password", password);
+        String sql = "SELECT COUNT(*) FROM public.users WHERE email = :email AND pass = :password";
+        Integer rows = jdbcTemplate.queryForObject(sql, params, Integer.class);
+
+        return (rows > 0) ? true : false;
+
+    }
 }

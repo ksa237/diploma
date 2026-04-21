@@ -1,11 +1,8 @@
 package ru.netology.diploma.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.netology.diploma.service.CloudService;
 
 import java.io.IOException;
@@ -20,7 +17,6 @@ public class CloudController {
 
     public CloudController(CloudService cloudService) {
         this.cloudService = cloudService;
-
     }
 
     @GetMapping("/list")
@@ -28,13 +24,22 @@ public class CloudController {
         return cloudService.getAllFiles(userId);
     }
 
-
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> authorizationMethod(HttpServletRequest req) throws IOException {
+    public ResponseEntity<Map<String,?>> authorizationMethod(@RequestBody Map<String, String> authData) throws IOException {
 
-        Map<String, String> response = Map.of("auth-token", "my-token-manafaka");
+        Boolean authSuccess = cloudService.isSuccessAuthorization(authData);
 
-        return ResponseEntity.ok(response);
+        Map<String, String> bodyOK = Map.of("auth-token", "my-token-manafaka");
+        Map<String, ?> bodyBadRequest = Map.of("message", "Bad credentials", "id", 1);
+
+        ResponseEntity response = null;
+
+        if (authSuccess) {
+            response = new ResponseEntity<>(bodyOK, HttpStatus.OK);
+        } else {
+            response = new ResponseEntity<>(bodyBadRequest, HttpStatus.BAD_REQUEST);
+        }
+        return response;
 
     }
 

@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import ru.netology.diploma.repository.CloudRepository;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class CloudService {
@@ -17,4 +18,9 @@ public class CloudService {
         return cloudRepository.getAllFiles(userId);
     }
 
+    public Boolean isSuccessAuthorization(Map<String, String> authData) {
+
+        return cloudRepository.isSuccessAuthorization(authData);
+
+    }
 }
