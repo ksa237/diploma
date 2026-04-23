@@ -4,6 +4,7 @@ package ru.netology.diploma.repository;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -41,6 +42,18 @@ public class CloudRepository {
         Integer rows = jdbcTemplate.queryForObject(sql, params, Integer.class);
 
         return (rows > 0) ? true : false;
+
+    }
+
+    public void save(Long userId, String filename, byte[] fileBytes) {
+
+        Map<String, Serializable> params = Map.of(
+                "userid", userId,
+                "filename", filename,
+                "filedata", fileBytes
+        );
+        String sql = "INSERT INTO public.UserFiles (userid, filename, filedata) VALUES (:userid, :filename, :filedata)";
+       jdbcTemplate.update(sql, params);
 
     }
 }

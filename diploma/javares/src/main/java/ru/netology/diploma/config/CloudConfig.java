@@ -13,8 +13,16 @@ public class CloudConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
                 .allowCredentials(true)
-                .allowedOrigins("http://localhost:8081")
+                .allowedOrigins(
+                        "http://localhost:8081"
+                        //,
+                        //"http://172.24.0.1",
+                        //"https://172.24.0.1"
+                )
                 .allowedMethods("*");
+
+
+
     }
 }
 

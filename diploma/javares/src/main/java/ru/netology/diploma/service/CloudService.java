@@ -14,7 +14,8 @@ public class CloudService {
     public CloudService(CloudRepository cloudRepository) {
         this.cloudRepository = cloudRepository;
     }
-    public List<String> getAllFiles(Long userId){
+
+    public List<String> getAllFiles(Long userId) {
         return cloudRepository.getAllFiles(userId);
     }
 
@@ -22,5 +23,9 @@ public class CloudService {
 
         return cloudRepository.isSuccessAuthorization(authData);
 
+    }
+
+    public void save(Long userId, String filename, byte[] fileBytes) {
+        cloudRepository.save(1L, filename, fileBytes);
     }
 }

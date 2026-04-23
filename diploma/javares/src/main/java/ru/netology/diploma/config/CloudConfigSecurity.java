@@ -15,6 +15,7 @@ public class CloudConfigSecurity {
                 .authorizeHttpRequests((authz) -> authz
                         .requestMatchers("/list").permitAll()
                         .requestMatchers("/login").permitAll()
+                        .requestMatchers("/file").permitAll()
                 )
 
                 .formLogin(form -> form.disable())
