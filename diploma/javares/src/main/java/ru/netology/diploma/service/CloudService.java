@@ -26,6 +26,11 @@ public class CloudService {
     }
 
     public void save(Long userId, String filename, byte[] fileBytes) {
-        cloudRepository.save(1L, filename, fileBytes);
+        cloudRepository.save(userId, filename, fileBytes);
+    }
+
+    public Integer delete(Long userId, String filename) {
+        return cloudRepository.delete(userId, filename);
+
     }
 }

@@ -1,13 +1,16 @@
 package ru.netology.diploma.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import ru.netology.diploma.service.CloudService;
+import tools.jackson.databind.cfg.MapperBuilder;
 
 import java.io.IOException;
 import java.util.Enumeration;
@@ -22,8 +25,11 @@ public class CloudController {
 
     private final CloudService cloudService;
 
-    public CloudController(CloudService cloudService) {
+    private final MapperBuilder mapperBuilder;
+
+    public CloudController(CloudService cloudService, MapperBuilder mapperBuilder) {
         this.cloudService = cloudService;
+        this.mapperBuilder = mapperBuilder;
     }
 
     @GetMapping("/list")
@@ -97,7 +103,7 @@ public class CloudController {
 
             if (existContent) {
                 cloudService.save(1L, filename, fileBytes);
-            }else {
+            } else {
                 Map<String, String> body = Map.of("description", "File data is empty.");
                 ResponseEntity response = new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
                 return response;
@@ -105,7 +111,6 @@ public class CloudController {
 
             String hash = multipartRequest.getParameter("hash");
             Logger.getLogger("FilePostMappingLogger").log(Level.INFO, "\n" + "Получен hash: " + hash);
-
 
 
         } catch (Exception e) {
@@ -145,11 +150,41 @@ public class CloudController {
 //        java-app-1  | Referer: http://localhost:8081/
 //        java-app-1  | Accept-Encoding: gzip, deflate, br, zstd
 //        java-app-1  | Accept-Language: ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7
-//        java-app-1  | Cookie: _pk_id.1.1fff=0695260f1763037d.1770315175.; portainer_api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsInJvbGUiOjEsInNjb3BlIjoiZGVmYXVsdCIsImZvcmNlQ2hhbmdlUGFzc3dvcmQiOmZhbHNlLCJleHAiOjE3NzY5NzExMzYsImlhdCI6MTc3Njk0MjMzNiwianRpIjoiYTBlMmNkNjEtOGViMS00NTlkLWJjNTctYzg0YmE0MjU5M2VlIn0.A0hAD0fN1yvDoyN7afI8r1w2ZmwPydW18kLlZuQst2E; _gorilla_csrf=MTc3Njk0MjMzNnxJaTk1VHpkc1l6aDFTWFZuV1RBclNFNTRlRXNyWjBaV09WZ3ZTWFpSVmtSaGFHazBRamxKUm01cFoxVTlJZ289fF1XP6cwj7jw-FXOhLT0unIVFDNg9ICzDW2Yv98w61It; auth-token=my-token-manafaka
+
 
 
         Map<String, String> body = Map.of("description", "The file is uploaded to the server");
         ResponseEntity response = new ResponseEntity<>(body, HttpStatus.OK);
+        return response;
+    }
+
+    @DeleteMapping("/file")
+    public ResponseEntity deleteFile(@RequestHeader("auth-token") String authToken, @RequestParam String filename) {
+
+        Integer delResult = cloudService.delete(1L, filename);
+
+        ResponseEntity response = null;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        if (delResult == 200) {
+            return ResponseEntity.ok().build();
+
+        } else if (delResult == 400) {
+            Map<String, ?> body = Map.of("message", "Error input data", "id", 1);
+            response = new ResponseEntity<>(body, headers, HttpStatus.BAD_REQUEST);
+
+        } else if (delResult == 401) {
+            Map<String, ?> body = Map.of("message", "Unauthorized error", "id", 1);
+            response = new ResponseEntity<>(body, headers, HttpStatus.UNAUTHORIZED);
+
+
+        } else if (delResult == 500) {
+            Map<String, ?> body = Map.of("message", "Error delete file", "id", 1);
+            response = new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
         return response;
     }
 

@@ -15,6 +15,6 @@ userid bigint not null,
 filename varchar(50) not null,
 filedata bytea not null,
 
-CONSTRAINT pk_userfiles PRIMARY KEY(id, filename)
+CONSTRAINT pk_userfiles PRIMARY KEY(filename)
 );
 
