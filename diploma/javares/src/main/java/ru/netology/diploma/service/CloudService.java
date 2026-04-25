@@ -15,8 +15,8 @@ public class CloudService {
         this.cloudRepository = cloudRepository;
     }
 
-    public List<String> getAllFiles(Long userId) {
-        return cloudRepository.getAllFiles(userId);
+    public List<Map<String,Object>>getAllFiles(Long userId, Integer limit) {
+        return cloudRepository.getAllFiles(userId, limit);
     }
 
     public Boolean isSuccessAuthorization(Map<String, String> authData) {

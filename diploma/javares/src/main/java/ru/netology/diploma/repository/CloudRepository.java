@@ -8,9 +8,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,17 +22,28 @@ public class CloudRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public List<String> getAllFiles(Long userId) {
+    public List<Map<String, Object>> getAllFiles(Long userId, Integer limit) {
 
-        Map params = Map.of("param1", "value1");
-        String sql = "SELECT CURRENT_TIMESTAMP current_ts;";
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userid", userId)
+                .addValue("limit", limit);
 
-        List<String> answer = jdbcTemplate.query(sql, (rs, rowNum) -> {
-            String currentTS = rs.getString("current_ts");
-            return currentTS;
+        //String sql = "SELECT filename, octet_lenght(filedata) AS size FROM public.userfiles WHERE userid = :userid LIMIT :limit";
+        String sql = "SELECT filename, octet_length(filedata) AS size FROM public.userfiles";
+
+        List<Map<String, Object>> answerList = jdbcTemplate.query(sql, (rs, rowNum) -> {
+
+            Map<String,Object> answ = new HashMap<>();
+            String filename = rs.getString("filename");
+            Integer size = rs.getInt("size");
+            answ.put("filename", filename);
+            answ.put("size", size);
+
+            return answ;
         });
+        Logger.getLogger("getAllFiles, repository").log(Level.INFO,answerList.toString() );
 
-        return answer;
+        return answerList;
     }
 
     public Boolean isSuccessAuthorization(Map<String, String> authData) {
@@ -58,7 +67,7 @@ public class CloudRepository {
                 "filedata", fileBytes
         );
         String sql = "INSERT INTO public.userfiles (userid, filename, filedata) VALUES (:userid, :filename, :filedata)";
-       jdbcTemplate.update(sql, params);
+        jdbcTemplate.update(sql, params);
 
     }
 
@@ -70,17 +79,17 @@ public class CloudRepository {
                 .addValue("filename", filename)
                 .addValue("userid", userId);
 
-        Integer rowAffected =0;
+        Integer rowAffected = 0;
         try {
             rowAffected = jdbcTemplate.update(sql, params);
         } catch (DataAccessException e) {
             return 500; //"Error delete file"
         }
 
-        if(rowAffected == 0){
+        if (rowAffected == 0) {
             ///without database error
             return 400; //"Error input data"
-        }else {
+        } else {
             return 200; //"Success deleted"
         }
 

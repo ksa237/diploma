@@ -15,6 +15,7 @@ public class CloudConfigSecurity {
                 .authorizeHttpRequests((authz) -> authz
                         .requestMatchers("/list").permitAll()
                         .requestMatchers("/login").permitAll()
+                        .requestMatchers("/logout").permitAll()
                         .requestMatchers("/file").permitAll()
                 )
 
