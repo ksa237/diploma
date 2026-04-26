@@ -1,6 +1,5 @@
 package ru.netology.diploma.repository;
 
-
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -17,7 +16,6 @@ public class CloudRepository {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
-
     public CloudRepository(NamedParameterJdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -28,12 +26,11 @@ public class CloudRepository {
                 .addValue("userid", userId)
                 .addValue("limit", limit);
 
-        //String sql = "SELECT filename, octet_lenght(filedata) AS size FROM public.userfiles WHERE userid = :userid LIMIT :limit";
-        String sql = "SELECT filename, octet_length(filedata) AS size FROM public.userfiles";
+        String sql = "SELECT filename, octet_length(filedata) AS size FROM public.userfiles WHERE userid = :userid LIMIT :limit";
 
-        List<Map<String, Object>> answerList = jdbcTemplate.query(sql, (rs, rowNum) -> {
+        List<Map<String, Object>> answerList = jdbcTemplate.query(sql, params, (rs, rowNum) -> {
 
-            Map<String,Object> answ = new HashMap<>();
+            Map<String, Object> answ = new HashMap<>();
             String filename = rs.getString("filename");
             Integer size = rs.getInt("size");
             answ.put("filename", filename);
@@ -41,7 +38,7 @@ public class CloudRepository {
 
             return answ;
         });
-        Logger.getLogger("getAllFiles, repository").log(Level.INFO,answerList.toString() );
+        //Logger.getLogger("getAllFiles, repository").log(Level.INFO,answerList.toString() );
 
         return answerList;
     }
@@ -51,7 +48,12 @@ public class CloudRepository {
         String login = authData.get("login");
         String password = authData.get("password");
 
-        Map<String, String> params = Map.of("email", login, "password", password);
+        //Map<String, String> params = Map.of("email", login, "password", password);
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("email", login)
+                .addValue("password", password);
+
         String sql = "SELECT COUNT(*) FROM public.users WHERE email = :email AND pass = :password";
         Integer rows = jdbcTemplate.queryForObject(sql, params, Integer.class);
 
@@ -61,11 +63,17 @@ public class CloudRepository {
 
     public void save(Long userId, String filename, byte[] fileBytes) {
 
-        Map<String, Serializable> params = Map.of(
-                "userid", userId,
-                "filename", filename,
-                "filedata", fileBytes
-        );
+//        Map<String, Serializable> params = Map.of(
+//                "userid", userId,
+//                "filename", filename,
+//                "filedata", fileBytes
+//        );
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userid", userId)
+                .addValue("filename", filename)
+                .addValue("filedata", fileBytes);
+
         String sql = "INSERT INTO public.userfiles (userid, filename, filedata) VALUES (:userid, :filename, :filedata)";
         jdbcTemplate.update(sql, params);
 
@@ -93,6 +101,22 @@ public class CloudRepository {
             return 200; //"Success deleted"
         }
 
+    }
 
+    public byte[] getFile(long userId, String filename) {
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("userid", userId)
+                .addValue("filename", filename);
+
+        String sql = "SELECT filedata FROM public.userfiles WHERE userid = :userid AND filename = :filename LIMIT 1";
+
+        List<byte[]> answerList = jdbcTemplate.query(sql, params, (rs, rowNum) -> {
+
+            byte[] answ = rs.getBytes("filedata");
+            return answ;
+        });
+
+        return answerList.get(0);
     }
 }

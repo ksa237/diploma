@@ -33,4 +33,8 @@ public class CloudService {
         return cloudRepository.delete(userId, filename);
 
     }
+
+    public byte[] get(long userId, String filename) {
+        return cloudRepository.getFile(userId, filename);
+    }
 }

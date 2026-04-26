@@ -184,6 +184,28 @@ public class CloudController {
         return response;
     }
 
+    @GetMapping("/file")
+    public ResponseEntity<?> dowloadFileFromCloud(@RequestHeader("auth-token") String authToken, @RequestParam String filename){
+
+        byte[] fileBytes = cloudService.get(1L, filename);
+
+        //'#/components/schemas/File'
+        //File:
+        //    type: object
+        //    properties:
+        //        hash:
+        //            type: string
+        //        file:
+        //            type: string
+        //            format: binary
+
+
+
+
+        return ResponseEntity.ok().build(); // 200
+    }
+
+
     @GetMapping("/list")
     public ResponseEntity<?> getAllFiles(@RequestHeader("auth-token") String authToken, @RequestParam Integer limit) {
 
@@ -208,5 +230,7 @@ public class CloudController {
         return response;
                 //ResponseEntity.ok().build(); // 200
     }
+
+
 
 }

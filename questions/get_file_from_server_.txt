@@ -1,0 +1,58 @@
+Реализую функцию /file
+GET
+получить файл с сервера,
+
+в документации сказано что данные должны быть типа 
+multipart/form-data:
+но формат ответа это объект по схеме $ref: '#/components/schemas/File'
+схема
+ File:
+      type: object
+      properties:
+        hash:
+          type: string
+        file:
+          type: string
+          format: binary
+          
+тут видно что подразумеваются два свойства: hash , file
+у меня складывается впечатление что это должен быть JSON объект у которого одно поле будет называться "file" и содержать текстовую строку, представляющую собой
+байты файла, т.е. нечитаемое содержимое.
+
+если я отправляю POST запрос загрузка файла на сервер - он выполняется успешно, в инструментах браузера я вижу параметры запроса. см. скриншот
+однако я не могу понять как выглядит структура запроса "загрузка файла на сервер", которая тоже соответствует схеме $ref: '#/components/schemas/File'
+
+Request URL
+http://localhost:8080/file?filename=4e075361-814f-480a-9b11-2c98b66b0f7c.jpeg
+Request Method
+POST
+Status Code
+200 OK
+Remote Address
+[::1]:8080
+Referrer Policy
+strict-origin-when-cross-origin
+
+
+POST /file?filename=4e075361-814f-480a-9b11-2c98b66b0f7c.jpeg HTTP/1.1
+Accept: application/json, text/plain, */*
+Accept-Encoding: gzip, deflate, br, zstd
+Accept-Language: ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7
+Connection: keep-alive
+Content-Length: 11762
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary1BOjXn0ejLyDMPNP
+Cookie: _pk_id.1.1fff=0695260f1763037d.1770315175.; auth-token=my-token-manafaka
+Host: localhost:8080
+Origin: http://localhost:8081
+Referer: http://localhost:8081/
+Sec-Fetch-Dest: empty
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: same-site
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; Chromium GOST) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36
+auth-token: Bearer my-token-manafaka
+sec-ch-ua: "Not(A:Brand";v="8", "Chromium";v="144"
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: "Linux"
+          
+
+2026-04-26T11:02:27.324Z ERROR 1 --- [diploma] [nio-8080-exec-1] o.a.c.c.C.[.[.[/].[dispatcherServlet]    : Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception [Request processing failed: org.springframework.web.multipart.MultipartException: Failed to parse multipart servlet request] with root cause
