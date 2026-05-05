@@ -10,9 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import ru.netology.diploma.service.CloudService;
-
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +25,13 @@ public class CloudController {
         this.cloudService = cloudService;
     }
 
+    /// /////////////////////////////
+    //++ scope AuthController
+    // в данной области кода выполняется извлечение логина и пароля пришедшего в запросе
+    // проверка авторизационных данных по базе пользователей - нужно обратиться в репозиторий
+    // и как успешный результат выдача токена либо возврат отказа в полномочиях
+    // также предусматривается проверка валидности токена, например удовлетворение сроку действия токена
+    // выдачу, проверку, хранение, удаление токена предусматривается в специальном классем TokenRepository
     @PostMapping("/login")
     public ResponseEntity<?> authorizationMethod(@RequestBody Map<String, String> authData) throws IOException {
 
@@ -53,6 +58,9 @@ public class CloudController {
         // kill auth-token
         return ResponseEntity.ok().build(); // 200
     }
+    //-- scope AuthController
+    /// ////////////////////////////////////
+
 
     @PostMapping("/file")
     public ResponseEntity<?> uploadFileToServer(@RequestHeader("auth-token") String authToken, @RequestParam String filename, HttpServletRequest request) {
@@ -203,6 +211,24 @@ public class CloudController {
 
 
         return ResponseEntity.ok().build(); // 200
+    }
+
+    @PutMapping("/file")
+    public ResponseEntity<?> editFileName(@RequestHeader("auth-token") String authToken, @RequestParam String filename){
+
+        //requestBody:
+        //description: Login and password hash
+        //required: true
+        //content:
+        //application/json:
+        //schema:
+        //type: object
+        //properties:
+        //name:
+        //type: string
+
+        return ResponseEntity.ok().build(); // 200
+
     }
 
 

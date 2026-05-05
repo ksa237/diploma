@@ -15,12 +15,8 @@ public class CloudConfig implements WebMvcConfigurer {
                 .allowCredentials(true)
                 .allowedOrigins(
                         "http://localhost:8081"
-                        //,
-                        //"http://172.24.0.1",
-                        //"https://172.24.0.1"
                 )
                 .allowedMethods("*");
-
 
 
     }
