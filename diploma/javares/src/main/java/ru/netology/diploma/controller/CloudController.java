@@ -1,16 +1,19 @@
 package ru.netology.diploma.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import ru.netology.diploma.service.CloudService;
+
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
@@ -193,9 +196,10 @@ public class CloudController {
     }
 
     @GetMapping("/file")
-    public ResponseEntity<?> dowloadFileFromCloud(@RequestHeader("auth-token") String authToken, @RequestParam String filename){
+    public ResponseEntity<Resource> dowloadFileFromCloud(@RequestHeader("auth-token") String authToken, @RequestParam String filename){
 
         byte[] fileBytes = cloudService.get(1L, filename);
+
 
         //'#/components/schemas/File'
         //File:
@@ -208,9 +212,19 @@ public class CloudController {
         //            format: binary
 
 
+        InputStream data = new ByteArrayInputStream(fileBytes);
+        BufferedInputStream buffData = new BufferedInputStream(data, 16*1024);
+        InputStreamResource responseData = new InputStreamResource(buffData);
+
+        ContentDisposition contentDisposition = ContentDisposition.attachment().filename(filename).build();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.setContentDisposition(contentDisposition);
 
 
-        return ResponseEntity.ok().build(); // 200
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(responseData);
     }
 
     @PutMapping("/file")
