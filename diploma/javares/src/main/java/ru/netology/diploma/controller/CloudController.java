@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
+import ru.netology.diploma.dto.ErrorMessage;
+import ru.netology.diploma.exception.NotFoundException;
 import ru.netology.diploma.service.CloudService;
 
 import java.io.BufferedInputStream;
@@ -17,6 +19,8 @@ import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/")
@@ -68,6 +72,18 @@ public class CloudController {
     @PostMapping("/file")
     public ResponseEntity<?> uploadFileToServer(@RequestHeader("auth-token") String authToken, @RequestParam String filename, HttpServletRequest request) {
 
+        //400, 401
+        //$ref: '#/components/schemas/Error'
+        //Error:
+        //type: object
+        //----properties:
+        //--------message:
+        //------------type: string
+        //------------description: Error message
+        //--------id:
+        //------------type: integer
+
+
         Enumeration<String> headerNames = request.getHeaderNames();
 
         HttpHeaders headers = new HttpHeaders();
@@ -83,8 +99,11 @@ public class CloudController {
                 if (!headerValue.contains("multipart/form-data")) {
                     //'#/components/schemas/Error'
                     Map<String, ?> body = Map.of("message", "Invalid content type", "id", 1);
-                    response = new ResponseEntity<>(body, headers, HttpStatus.BAD_REQUEST);
+                    response = new ResponseEntity<>(body, headers, HttpStatus.BAD_REQUEST); //400
                     return response;
+
+
+
                 }
             }
         }
@@ -265,12 +284,34 @@ public class CloudController {
 
         ResponseEntity<?> response = null;
         List<Map<String,Object>> bodyList = cloudService.getAllFiles(1L, limit);
+
+        Logger.getLogger("getAllFiles").log(Level.WARNING,"before TRY...");
+
+        try {
+            Logger.getLogger("getAllFiles").log(Level.WARNING,"TRY proccess...");
+            boolean b  = bodyList.isEmpty() == false;
+            int result = 10/bodyList.size();
+
+        } catch (Exception e) {
+            Logger.getLogger("getAllFiles").log(Level.WARNING,"Exception...");
+            throw new NotFoundException(e.getMessage());
+        }
+
+
         response = new ResponseEntity<>(bodyList, headers, HttpStatus.OK);
 
         return response;
                 //ResponseEntity.ok().build(); // 200
     }
 
+    //https://struchkov.dev/blog/ru/exception-handling-controlleradvice/#
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ErrorMessage> handleException(NotFoundException exception) {
+        Logger.getLogger("getAllFiles").log(Level.WARNING,"in ExceptionHandler...");
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(new ErrorMessage(exception.getMessage(), 1));
 
 
+    }
 }

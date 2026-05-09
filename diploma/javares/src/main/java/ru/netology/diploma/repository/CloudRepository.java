@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.io.Serializable;
 import java.util.*;
@@ -118,5 +119,10 @@ public class CloudRepository {
         });
 
         return answerList.get(0);
+//        if(!answerList.isEmpty()){
+//            return answerList.getFirst();
+//        } else {
+//            return new Exception(e.)
+//        }
     }
 }
