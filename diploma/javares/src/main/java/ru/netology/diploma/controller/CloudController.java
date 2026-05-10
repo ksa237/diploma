@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import ru.netology.diploma.dto.ErrorMessage;
+import ru.netology.diploma.exception.EmptyListOfFilesException;
 import ru.netology.diploma.exception.NotFoundException;
 import ru.netology.diploma.service.CloudService;
 
@@ -266,7 +267,9 @@ public class CloudController {
 
 
     @GetMapping("/list")
-    public ResponseEntity<?> getAllFiles(@RequestHeader("auth-token") String authToken, @RequestParam Integer limit) {
+    public ResponseEntity<List<Map<String,Object>>> getAllFiles(@RequestHeader("auth-token") String authToken, @RequestParam Integer limit) {
+        // возвращаемое значение - List, список из Map, в которой согласно документации лежат поля
+        // filename - имя файла и size - размер файла
 
         //200
         //filename:
@@ -282,36 +285,19 @@ public class CloudController {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        ResponseEntity<?> response = null;
+        //вызов сервиса, здесь получаем осноные данные для возврата на клиент
         List<Map<String,Object>> bodyList = cloudService.getAllFiles(1L, limit);
 
-        Logger.getLogger("getAllFiles").log(Level.WARNING,"before TRY...");
+        //возврат успешного ответа, код 200
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .headers(headers)
+                .body(bodyList);
 
-        try {
-            Logger.getLogger("getAllFiles").log(Level.WARNING,"TRY proccess...");
-            boolean b  = bodyList.isEmpty() == false;
-            int result = 10/bodyList.size();
-
-        } catch (Exception e) {
-            Logger.getLogger("getAllFiles").log(Level.WARNING,"Exception...");
-            throw new NotFoundException(e.getMessage());
-        }
-
-
-        response = new ResponseEntity<>(bodyList, headers, HttpStatus.OK);
-
-        return response;
+                //ok(bodyList, headers, HttpStatus.OK);
+                //return response;
                 //ResponseEntity.ok().build(); // 200
     }
 
-    //https://struchkov.dev/blog/ru/exception-handling-controlleradvice/#
-    @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<ErrorMessage> handleException(NotFoundException exception) {
-        Logger.getLogger("getAllFiles").log(Level.WARNING,"in ExceptionHandler...");
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(new ErrorMessage(exception.getMessage(), 1));
 
-
-    }
 }

@@ -6,6 +6,8 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.client.HttpClientErrorException;
+import ru.netology.diploma.exception.AppException;
+import ru.netology.diploma.exception.EmptyListOfFilesException;
 
 import java.io.Serializable;
 import java.util.*;
@@ -41,7 +43,12 @@ public class CloudRepository {
         });
         //Logger.getLogger("getAllFiles, repository").log(Level.INFO,answerList.toString() );
 
-        return answerList;
+        if (!answerList.isEmpty()) {
+            return answerList;
+        } else {
+            throw new EmptyListOfFilesException("Список файлов для пользователя пуст");
+        }
+
     }
 
     public Boolean isSuccessAuthorization(Map<String, String> authData) {
