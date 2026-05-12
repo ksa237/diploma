@@ -1,18 +1,13 @@
 package ru.netology.diploma.repository;
 
 import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.client.HttpClientErrorException;
-import ru.netology.diploma.exception.AppException;
-import ru.netology.diploma.exception.EmptyListOfFilesException;
+import ru.netology.diploma.dto.ResponseFileEntity;
 
-import java.io.Serializable;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.List;
+import java.util.Map;
 
 @Repository
 public class CloudRepository {
@@ -23,7 +18,7 @@ public class CloudRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public List<Map<String, Object>> getAllFiles(Long userId, Integer limit) {
+    public List<ResponseFileEntity> getAllFiles(Long userId, Integer limit) {
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userid", userId)
@@ -31,23 +26,22 @@ public class CloudRepository {
 
         String sql = "SELECT filename, octet_length(filedata) AS size FROM public.userfiles WHERE userid = :userid LIMIT :limit";
 
-        List<Map<String, Object>> answerList = jdbcTemplate.query(sql, params, (rs, rowNum) -> {
+        List<ResponseFileEntity> answerList = jdbcTemplate.query(sql, params, (rs, rowNum) -> {
 
-            Map<String, Object> answ = new HashMap<>();
             String filename = rs.getString("filename");
             Integer size = rs.getInt("size");
-            answ.put("filename", filename);
-            answ.put("size", size);
+
+            ResponseFileEntity answ = new ResponseFileEntity(filename, size);
 
             return answ;
         });
         //Logger.getLogger("getAllFiles, repository").log(Level.INFO,answerList.toString() );
 
-        if (!answerList.isEmpty()) {
-            return answerList;
-        } else {
-            throw new EmptyListOfFilesException("Список файлов для пользователя пуст");
-        }
+        //if (!answerList.isEmpty()) {
+        return answerList;
+        //} else {
+        //    throw new EmptyListOfFilesException("Список файлов для пользователя пуст");
+        //}
 
     }
 
@@ -55,8 +49,6 @@ public class CloudRepository {
 
         String login = authData.get("login");
         String password = authData.get("password");
-
-        //Map<String, String> params = Map.of("email", login, "password", password);
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("email", login)

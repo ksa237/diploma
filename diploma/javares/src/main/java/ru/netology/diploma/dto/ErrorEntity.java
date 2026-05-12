@@ -1,6 +1,6 @@
 package ru.netology.diploma.dto;
 
-public class ErrorMessage {
+public class ErrorEntity {
 
     //Error:
     //type: object
@@ -14,7 +14,7 @@ public class ErrorMessage {
     private String message;
     private Integer id;
 
-    public ErrorMessage(String message, Integer id) {
+    public ErrorEntity(String message, Integer id) {
         this.message = message;
         this.id = id;
     }

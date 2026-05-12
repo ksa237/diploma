@@ -1,6 +1,8 @@
 package ru.netology.diploma.service;
 
 import org.springframework.stereotype.Service;
+import ru.netology.diploma.dto.ResponseFileEntity;
+import ru.netology.diploma.exception.BadCredentialsException;
 import ru.netology.diploma.repository.CloudRepository;
 
 import java.util.List;
@@ -15,13 +17,17 @@ public class CloudService {
         this.cloudRepository = cloudRepository;
     }
 
-    public List<Map<String,Object>>getAllFiles(Long userId, Integer limit) {
+    public List<ResponseFileEntity>getAllFiles(Long userId, Integer limit) {
         return cloudRepository.getAllFiles(userId, limit);
     }
 
-    public Boolean isSuccessAuthorization(Map<String, String> authData) {
+    public void processAuthorization(Map<String, String> authData) {
 
-        return cloudRepository.isSuccessAuthorization(authData);
+        Boolean resultAuth = cloudRepository.isSuccessAuthorization(authData);
+
+        if (!resultAuth) {
+            throw new BadCredentialsException("Неправильные имя пользователя или пароль");
+        }
 
     }
 

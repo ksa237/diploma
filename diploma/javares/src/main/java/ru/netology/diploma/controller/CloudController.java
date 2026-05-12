@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
-import ru.netology.diploma.dto.ErrorMessage;
-import ru.netology.diploma.exception.EmptyListOfFilesException;
-import ru.netology.diploma.exception.NotFoundException;
+import ru.netology.diploma.dto.ResponseFileEntity;
+import ru.netology.diploma.exception.BaseIOException;
+import ru.netology.diploma.exception.ErrorInputDataException;
 import ru.netology.diploma.service.CloudService;
 
 import java.io.BufferedInputStream;
@@ -20,8 +20,6 @@ import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/")
@@ -33,7 +31,7 @@ public class CloudController {
         this.cloudService = cloudService;
     }
 
-    /// /////////////////////////////
+    /// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //++ scope AuthController
     // в данной области кода выполняется извлечение логина и пароля пришедшего в запросе
     // проверка авторизационных данных по базе пользователей - нужно обратиться в репозиторий
@@ -41,39 +39,61 @@ public class CloudController {
     // также предусматривается проверка валидности токена, например удовлетворение сроку действия токена
     // выдачу, проверку, хранение, удаление токена предусматривается в специальном классем TokenRepository
     @PostMapping("/login")
-    public ResponseEntity<?> authorizationMethod(@RequestBody Map<String, String> authData) throws IOException {
+    public ResponseEntity<Map<String, String>> authorizationMethod(@RequestBody Map<String, String> authData) throws IOException {
 
-        Boolean authSuccess = cloudService.isSuccessAuthorization(authData);
+        //200
+        //Login:
+        //type: object
+        //    properties:
+        //        auth-token:
+        //        type: string
+
+        //400
+        //Error:
+        //type: object
+        //  properties:
+        //      message:
+        //          type: string
+        //          description: Error message
+        //      id:
+        //          type: integer
+
+        cloudService.processAuthorization(authData);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        ResponseEntity<?> response = null;
+        Map<String, String> body = Map.of("auth-token", "my-token-manafaka");
 
-        if (authSuccess) {
-            Map<String, String> body = Map.of("auth-token", "my-token-manafaka");
-            response = new ResponseEntity<>(body, headers, HttpStatus.OK);
+        //возврат успешного ответа, код 200
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .headers(headers)
+                .body(body);
 
-        } else {
-            Map<String, ?> body = Map.of("message", "Error input data", "id", 1);
-            response = new ResponseEntity<>(body, headers, HttpStatus.BAD_REQUEST);
-        }
-
-        return response;
     }
 
     @PostMapping("/logout")
     public ResponseEntity<String> logoutMethod(@RequestHeader("auth-token") String authToken) {
         // kill auth-token
-        return ResponseEntity.ok().build(); // 200
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.TEXT_PLAIN);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .headers(headers).build();
+
+
     }
     //-- scope AuthController
-    /// ////////////////////////////////////
+    /// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
     @PostMapping("/file")
-    public ResponseEntity<?> uploadFileToServer(@RequestHeader("auth-token") String authToken, @RequestParam String filename, HttpServletRequest request) {
+    public ResponseEntity<String> uploadFileToServer(@RequestHeader("auth-token") String authToken, @RequestParam String filename, HttpServletRequest request) {
 
-        //400, 401
+        //400 - Error input data
+        //401 - Unauthorized error
         //$ref: '#/components/schemas/Error'
         //Error:
         //type: object
@@ -83,6 +103,9 @@ public class CloudController {
         //------------description: Error message
         //--------id:
         //------------type: integer
+
+
+        //проверить auth-token, если false тогда  401 - Unauthorized error
 
 
         Enumeration<String> headerNames = request.getHeaderNames();
@@ -98,54 +121,45 @@ public class CloudController {
             if (headerName.equals("Content-Type")) {
                 existContentType = true;
                 if (!headerValue.contains("multipart/form-data")) {
-                    //'#/components/schemas/Error'
-                    Map<String, ?> body = Map.of("message", "Invalid content type", "id", 1);
-                    response = new ResponseEntity<>(body, headers, HttpStatus.BAD_REQUEST); //400
-                    return response;
-
-
-
+                    throw new ErrorInputDataException("Invalid content type");
                 }
             }
         }
 
         if (!existContentType) {
-            //'#/components/schemas/Error'
-            Map<String, ?> body = Map.of("message", "No header Content-Type", "id", 1);
-            response = new ResponseEntity<>(body, headers, HttpStatus.BAD_REQUEST);
-            return response;
+            throw new ErrorInputDataException("No header Content-Type");
         }
 
-        try {
-            StandardServletMultipartResolver multipartResolver = new StandardServletMultipartResolver();
-            MultipartHttpServletRequest multipartRequest = multipartResolver.resolveMultipart(request);
 
-            Boolean existContent = false;
-            byte[] fileBytes = null;
-            MultipartFile file = multipartRequest.getFile("file");
-            if (file != null && !file.isEmpty()) {
+        StandardServletMultipartResolver multipartResolver = new StandardServletMultipartResolver();
+        MultipartHttpServletRequest multipartRequest = multipartResolver.resolveMultipart(request);
+
+        Boolean existContent = false;
+        byte[] fileBytes = null;
+        MultipartFile file = multipartRequest.getFile("file");
+        if (file != null && !file.isEmpty()) {
+            try {
                 fileBytes = file.getBytes();
                 existContent = true;
+            } catch (IOException e) {
+                throw new BaseIOException(e.getMessage());
             }
-
-            if (existContent) {
-                cloudService.save(1L, filename, fileBytes);
-            } else {
-                //'#/components/schemas/Error'
-                Map<String, ?> body = Map.of("message", "File data is empty", "id", 1);
-                response = new ResponseEntity<>(body, headers, HttpStatus.BAD_REQUEST);
-                return response;
-            }
-
-            String hash = multipartRequest.getParameter("hash");
-
-        } catch (Exception e) {
-            //'#/components/schemas/Error'
-            Map<String, ?> body = Map.of("message", "Error: " + e.getMessage(), "id", 1);
-            response = new ResponseEntity<>(body, headers, HttpStatus.UNAUTHORIZED); //401
-            return response;
         }
 
+        if (existContent) {
+            cloudService.save(1L, filename, fileBytes);
+        } else {
+            throw new ErrorInputDataException("File data is empty");
+
+        }
+
+        String hash = multipartRequest.getParameter("hash"); // а дальше что с ним делать? ;-)
+
+
+        //200
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .build();
 
 //        -=от Postman=-
 //        headers:
@@ -178,8 +192,6 @@ public class CloudController {
 //        Accept-Encoding: gzip, deflate, br, zstd
 //        Accept-Language: ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7
 
-
-        return ResponseEntity.ok().build(); // 200
     }
 
     @DeleteMapping("/file")
@@ -216,7 +228,7 @@ public class CloudController {
     }
 
     @GetMapping("/file")
-    public ResponseEntity<Resource> dowloadFileFromCloud(@RequestHeader("auth-token") String authToken, @RequestParam String filename){
+    public ResponseEntity<Resource> dowloadFileFromCloud(@RequestHeader("auth-token") String authToken, @RequestParam String filename) {
 
         byte[] fileBytes = cloudService.get(1L, filename);
 
@@ -233,7 +245,7 @@ public class CloudController {
 
 
         InputStream data = new ByteArrayInputStream(fileBytes);
-        BufferedInputStream buffData = new BufferedInputStream(data, 16*1024);
+        BufferedInputStream buffData = new BufferedInputStream(data, 16 * 1024);
         InputStreamResource responseData = new InputStreamResource(buffData);
 
         ContentDisposition contentDisposition = ContentDisposition.attachment().filename(filename).build();
@@ -241,14 +253,13 @@ public class CloudController {
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
         headers.setContentDisposition(contentDisposition);
 
-
         return ResponseEntity.ok()
                 .headers(headers)
                 .body(responseData);
     }
 
     @PutMapping("/file")
-    public ResponseEntity<?> editFileName(@RequestHeader("auth-token") String authToken, @RequestParam String filename){
+    public ResponseEntity<?> editFileName(@RequestHeader("auth-token") String authToken, @RequestParam String filename) {
 
         //requestBody:
         //description: Login and password hash
@@ -267,9 +278,7 @@ public class CloudController {
 
 
     @GetMapping("/list")
-    public ResponseEntity<List<Map<String,Object>>> getAllFiles(@RequestHeader("auth-token") String authToken, @RequestParam Integer limit) {
-        // возвращаемое значение - List, список из Map, в которой согласно документации лежат поля
-        // filename - имя файла и size - размер файла
+    public ResponseEntity<List<ResponseFileEntity>> getAllFiles(@RequestHeader("auth-token") String authToken, @RequestParam Integer limit) {
 
         //200
         //filename:
@@ -286,7 +295,7 @@ public class CloudController {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         //вызов сервиса, здесь получаем осноные данные для возврата на клиент
-        List<Map<String,Object>> bodyList = cloudService.getAllFiles(1L, limit);
+        List<ResponseFileEntity> bodyList = cloudService.getAllFiles(1L, limit);
 
         //возврат успешного ответа, код 200
         return ResponseEntity
@@ -294,9 +303,9 @@ public class CloudController {
                 .headers(headers)
                 .body(bodyList);
 
-                //ok(bodyList, headers, HttpStatus.OK);
-                //return response;
-                //ResponseEntity.ok().build(); // 200
+        //ok(bodyList, headers, HttpStatus.OK);
+        //return response;
+        //ResponseEntity.ok().build(); // 200
     }
 
 
