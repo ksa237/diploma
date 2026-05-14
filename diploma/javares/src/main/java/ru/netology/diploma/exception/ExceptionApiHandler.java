@@ -1,5 +1,6 @@
 package ru.netology.diploma.exception;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -9,11 +10,11 @@ import ru.netology.diploma.dto.ErrorEntity;
 @RestControllerAdvice
 public class ExceptionApiHandler {
 
-//    //https://struchkov.dev/blog/ru/exception-handling-controlleradvice/#
+    //https://struchkov.dev/blog/ru/exception-handling-controlleradvice/#
 
 
     @ExceptionHandler(BaseIOException.class)
-    public ResponseEntity<ErrorEntity> handleException(BaseIOException exception) {
+    public ResponseEntity<ErrorEntity> baseIOException(BaseIOException exception) {
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST) //400
@@ -22,7 +23,7 @@ public class ExceptionApiHandler {
 
 
     @ExceptionHandler(ErrorInputDataException.class)
-    public ResponseEntity<ErrorEntity> handleException(ErrorInputDataException exception) {
+    public ResponseEntity<ErrorEntity> errorInputDataException(ErrorInputDataException exception) {
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST) //400
@@ -30,11 +31,20 @@ public class ExceptionApiHandler {
     }
 
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ErrorEntity> handleException(BadCredentialsException exception) {
+    public ResponseEntity<ErrorEntity> badCredentialsException(BadCredentialsException exception) {
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST) //400
                 .body(new ErrorEntity(exception.getMessage(), 1));
+    }
+
+
+
+    @ExceptionHandler(BaseDataAccessException.class)
+    public ResponseEntity<ErrorEntity> dataAccessException(BaseDataAccessException exception) {
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorEntity(exception.getMessage(),1));
     }
 
 

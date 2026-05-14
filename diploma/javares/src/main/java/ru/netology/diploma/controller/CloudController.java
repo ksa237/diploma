@@ -161,70 +161,46 @@ public class CloudController {
                 .status(HttpStatus.OK)
                 .build();
 
-//        -=от Postman=-
-//        headers:
-//        auth-token: my-token-manafaka
-//        User-Agent: PostmanRuntime/7.53.0
-//        Accept: */*
-//        Postman-Token: 6624744b-5c67-4a7d-835c-43d360416355
-//        Host: localhost:8080
-//        Accept-Encoding: gzip, deflate, br
-//        Connection: keep-alive
-//        Cookie: JSESSIONID=B4A9C35701161C28F3ECE3E151B4530F
-//        Content-Length: 0
-
-//        от FRONT
-//        Headers:Host: localhost:8080
-//        Connection: keep-alive
-//        Content-Length: 11762
-//        sec-ch-ua-platform: "Linux"
-//        User-Agent: Mozilla/5.0 (X11; Linux x86_64; Chromium GOST) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36
-//        Accept: application/json, text/plain, */*
-//        auth-token: Bearer my-token-manafaka
-//        Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryEJMpvfZOO5jEUghs
-//        sec-ch-ua: "Not(A:Brand";v="8", "Chromium";v="144"
-//        sec-ch-ua-mobile: ?0
-//        Origin: http://localhost:8081
-//        Sec-Fetch-Site: same-site
-//        Sec-Fetch-Mode: cors
-//        Sec-Fetch-Dest: empty
-//        Referer: http://localhost:8081/
-//        Accept-Encoding: gzip, deflate, br, zstd
-//        Accept-Language: ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7
-
     }
 
     @DeleteMapping("/file")
-    public ResponseEntity<?> deleteFile(@RequestHeader("auth-token") String authToken, @RequestParam String filename) {
+    public ResponseEntity<String> deleteFile(@RequestHeader("auth-token") String authToken, @RequestParam String filename) {
 
-        Integer delResult = cloudService.delete(1L, filename);
+        //400 - error input data
+        //401 - unathorized error
+        //500 - error delete file
 
-        ResponseEntity<?> response = null;
+        cloudService.actionDelete(1L, filename);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
+//        ResponseEntity<?> response = null;
+//
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.APPLICATION_JSON);
+//
+//        if (delResult == 200) {
+//            return ResponseEntity.ok().build();
+//
+//        } else if (delResult == 400) {
+//            //'#/components/schemas/Error'
+//            Map<String, ?> body = Map.of("message", "Error input data", "id", 1);
+//            response = new ResponseEntity<>(body, headers, HttpStatus.BAD_REQUEST);
+//
+//        } else if (delResult == 401) {
+//            //'#/components/schemas/Error'
+//            Map<String, ?> body = Map.of("message", "Unauthorized error", "id", 1);
+//            response = new ResponseEntity<>(body, headers, HttpStatus.UNAUTHORIZED);
+//
+//
+//        } else if (delResult == 500) {
+//            //'#/components/schemas/Error'
+//            Map<String, ?> body = Map.of("message", "Error delete file", "id", 1);
+//            response = new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
 
-        if (delResult == 200) {
-            return ResponseEntity.ok().build();
-
-        } else if (delResult == 400) {
-            //'#/components/schemas/Error'
-            Map<String, ?> body = Map.of("message", "Error input data", "id", 1);
-            response = new ResponseEntity<>(body, headers, HttpStatus.BAD_REQUEST);
-
-        } else if (delResult == 401) {
-            //'#/components/schemas/Error'
-            Map<String, ?> body = Map.of("message", "Unauthorized error", "id", 1);
-            response = new ResponseEntity<>(body, headers, HttpStatus.UNAUTHORIZED);
-
-
-        } else if (delResult == 500) {
-            //'#/components/schemas/Error'
-            Map<String, ?> body = Map.of("message", "Error delete file", "id", 1);
-            response = new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-        return response;
+        //200
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .build();
     }
 
     @GetMapping("/file")
@@ -275,7 +251,6 @@ public class CloudController {
         return ResponseEntity.ok().build(); // 200
 
     }
-
 
     @GetMapping("/list")
     public ResponseEntity<List<ResponseFileEntity>> getAllFiles(@RequestHeader("auth-token") String authToken, @RequestParam Integer limit) {

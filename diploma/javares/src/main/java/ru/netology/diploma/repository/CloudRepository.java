@@ -5,9 +5,13 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.netology.diploma.dto.ResponseFileEntity;
+import ru.netology.diploma.exception.BaseDataAccessException;
+import ru.netology.diploma.exception.ErrorInputDataException;
 
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Repository
 public class CloudRepository {
@@ -79,7 +83,7 @@ public class CloudRepository {
 
     }
 
-    public Integer delete(Long userId, String filename) {
+    public void actionDelete(Long userId, String filename) {
 
         String sql = "DELETE FROM public.userfiles WHERE filename = :filename AND userid = :userid";
 
@@ -87,18 +91,23 @@ public class CloudRepository {
                 .addValue("filename", filename)
                 .addValue("userid", userId);
 
+
         Integer rowAffected = 0;
         try {
             rowAffected = jdbcTemplate.update(sql, params);
+            //Logger.getLogger("TryDelete").log(Level.WARNING,"section-try");
         } catch (DataAccessException e) {
-            return 500; //"Error delete file"
+            //Logger.getLogger("TryDelete").log(Level.WARNING,"section-cach-500");
+            throw new BaseDataAccessException(e.getMessage());
+            //return 500; //"Error delete file"
         }
 
         if (rowAffected == 0) {
             ///without database error
-            return 400; //"Error input data"
-        } else {
-            return 200; //"Success deleted"
+            throw new ErrorInputDataException("error input data");
+            //return 400; //"Error input data"
+//        } else {
+//            return 200; //"Success deleted"
         }
 
     }

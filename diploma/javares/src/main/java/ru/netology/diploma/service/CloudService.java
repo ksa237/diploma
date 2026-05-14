@@ -35,8 +35,8 @@ public class CloudService {
         cloudRepository.save(userId, filename, fileBytes);
     }
 
-    public Integer delete(Long userId, String filename) {
-        return cloudRepository.delete(userId, filename);
+    public void actionDelete(Long userId, String filename) {
+        cloudRepository.actionDelete(userId, filename);
 
     }
 
