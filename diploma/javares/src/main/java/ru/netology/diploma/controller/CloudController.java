@@ -235,7 +235,7 @@ public class CloudController {
     }
 
     @PutMapping("/file")
-    public ResponseEntity<?> editFileName(@RequestHeader("auth-token") String authToken, @RequestParam String filename) {
+    public ResponseEntity<String> editFileName(@RequestHeader("auth-token") String authToken, @RequestParam String filename, @RequestBody Map<String, String> updateData) {
 
         //requestBody:
         //description: Login and password hash
@@ -248,7 +248,17 @@ public class CloudController {
         //name:
         //type: string
 
-        return ResponseEntity.ok().build(); // 200
+        //'200': Success upload
+        //'400': Error input data
+        //'401': Unauthorized error
+        //'500': Error Edit file name
+
+        String newfilename = updateData.get("name");
+        cloudService.editFileName(1L, filename, newfilename);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .build();
 
     }
 

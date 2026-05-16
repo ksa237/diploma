@@ -133,4 +133,29 @@ public class CloudRepository {
 //            return new Exception(e.)
 //        }
     }
+
+    public void editFileName(long userId, String filename, String newfilename) {
+
+        String sql = "UPDATE public.userfiles SET filename = :newfilename WHERE filename = :filename AND userid = :userid";
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("filename", filename)
+                .addValue("newfilename", newfilename)
+                .addValue("userid", userId);
+
+        Integer rowAffected = 0;
+        try {
+            rowAffected = jdbcTemplate.update(sql, params);
+        } catch (DataAccessException e) {
+            throw new BaseDataAccessException(e.getMessage());
+        }
+
+        if (rowAffected == 0) {
+            ///without database error
+            throw new ErrorInputDataException("error input data");
+        }
+
+
+
+    }
 }

@@ -43,4 +43,10 @@ public class CloudService {
     public byte[] get(long userId, String filename) {
         return cloudRepository.getFile(userId, filename);
     }
+
+    public void editFileName(long userId, String filename, String newfilename) {
+
+        cloudRepository.editFileName(userId, filename, newfilename);
+
+    }
 }
