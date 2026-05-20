@@ -9,9 +9,6 @@ import ru.netology.diploma.exception.BaseDataAccessException;
 import ru.netology.diploma.exception.ErrorInputDataException;
 
 import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @Repository
 public class CloudRepository {
@@ -46,22 +43,6 @@ public class CloudRepository {
         //} else {
         //    throw new EmptyListOfFilesException("Список файлов для пользователя пуст");
         //}
-
-    }
-
-    public Boolean isSuccessAuthorization(Map<String, String> authData) {
-
-        String login = authData.get("login");
-        String password = authData.get("password");
-
-        MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("email", login)
-                .addValue("password", password);
-
-        String sql = "SELECT COUNT(*) FROM public.users WHERE email = :email AND pass = :password";
-        Integer rows = jdbcTemplate.queryForObject(sql, params, Integer.class);
-
-        return (rows > 0) ? true : false;
 
     }
 
@@ -154,7 +135,6 @@ public class CloudRepository {
             ///without database error
             throw new ErrorInputDataException("error input data");
         }
-
 
 
     }

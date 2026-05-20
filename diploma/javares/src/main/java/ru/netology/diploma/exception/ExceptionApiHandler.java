@@ -47,5 +47,12 @@ public class ExceptionApiHandler {
                 .body(new ErrorEntity(exception.getMessage(),1));
     }
 
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorEntity> unauthorizedException(UnauthorizedException exception){
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(new ErrorEntity(exception.getMessage(), 1));
+    }
+
 
 }

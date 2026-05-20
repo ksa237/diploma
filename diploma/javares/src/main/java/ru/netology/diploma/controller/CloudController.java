@@ -11,6 +11,8 @@ import org.springframework.web.multipart.support.StandardServletMultipartResolve
 import ru.netology.diploma.dto.ResponseFileEntity;
 import ru.netology.diploma.exception.BaseIOException;
 import ru.netology.diploma.exception.ErrorInputDataException;
+import ru.netology.diploma.exception.UnauthorizedException;
+import ru.netology.diploma.service.AuthService;
 import ru.netology.diploma.service.CloudService;
 
 import java.io.BufferedInputStream;
@@ -26,9 +28,11 @@ import java.util.Map;
 public class CloudController {
 
     private final CloudService cloudService;
+    private final AuthService authService;
 
-    public CloudController(CloudService cloudService) {
+    public CloudController(CloudService cloudService, AuthService authService) {
         this.cloudService = cloudService;
+        this.authService = authService;
     }
 
     /// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -58,11 +62,11 @@ public class CloudController {
         //      id:
         //          type: integer
 
-        cloudService.processAuthorization(authData);
+        String userToken = authService.processAuthorization(authData);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        Map<String, String> body = Map.of("auth-token", "my-token-manafaka");
+        Map<String, String> body = Map.of("auth-token", userToken);
 
         //возврат успешного ответа, код 200
         return ResponseEntity
@@ -76,6 +80,8 @@ public class CloudController {
     public ResponseEntity<String> logoutMethod(@RequestHeader("auth-token") String authToken) {
         // kill auth-token
 
+        authService.invalidateToken(authToken);
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.TEXT_PLAIN);
 
@@ -86,6 +92,7 @@ public class CloudController {
 
     }
     //-- scope AuthController
+
     /// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -276,6 +283,12 @@ public class CloudController {
         //  description: File size in bytes
         //  required: true
 
+
+        //проверяем токен
+        if (!authService.isValidToken(authToken)) {
+            throw new UnauthorizedException("Невалидный токен");
+        }
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -288,9 +301,6 @@ public class CloudController {
                 .headers(headers)
                 .body(bodyList);
 
-        //ok(bodyList, headers, HttpStatus.OK);
-        //return response;
-        //ResponseEntity.ok().build(); // 200
     }
 
 
