@@ -11,6 +11,8 @@ import java.util.UUID;
 @Service
 public class AuthService {
 
+    private final String TOKEN_PREFIX = "Bearer";
+
     private final TokenRepository tokenRepository;
 
     public AuthService(TokenRepository tokenRepository) {
@@ -19,6 +21,7 @@ public class AuthService {
 
     public String processAuthorization(Map<String, String> authData) {
 
+
         AuthResponse authResponse = tokenRepository.isSuccessAuthorization(authData);
 
         if (!authResponse.getSuccAuth()) {
@@ -26,7 +29,7 @@ public class AuthService {
         }
 
         //если обошлись без исключения BadCredentialsException, значит генерируем токен
-        String userToken = generateToken();
+        String userToken = generateToken(); // для authData
 
         Long userId = authResponse.getUserId();
         tokenRepository.saveToken(userId, userToken);
@@ -40,11 +43,18 @@ public class AuthService {
     }
 
     public boolean isValidToken(String userToken) {
-        return tokenRepository.findToken(userToken).isPresent();
+        String parseToken = userToken.replaceFirst("^"+TOKEN_PREFIX+"\\s*", "");
+        return tokenRepository.findToken(parseToken).isPresent();
     }
 
     public void invalidateToken(String userToken) {
-        tokenRepository.deleteToken(userToken);
+        String parseToken = userToken.replaceFirst("^"+TOKEN_PREFIX+"\\s*", "");
+        tokenRepository.deleteToken(parseToken);
     }
 
+    public Long getUserIdByToken(String userToken) {
+        String parseToken = userToken.replaceFirst("^"+TOKEN_PREFIX+"\\s*", "");
+        return tokenRepository.getUserIdByToken(parseToken);
+
+    }
 }

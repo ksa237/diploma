@@ -5,13 +5,14 @@ public class AuthResponse {
     private Long userId;
     private Boolean succAuth;
 
-    public AuthResponse() {;
+
+    public AuthResponse() {
     }
 
-    public AuthResponse(Long userId, Boolean succAuth) {
-        this.userId = userId;
-        this.succAuth = succAuth;
-    }
+//    public AuthResponse(Long userId, Boolean succAuth) {
+//        this.userId = userId;
+//        this.succAuth = succAuth;
+//    }
 
     public Boolean getSuccAuth() {
         return succAuth;
@@ -28,4 +29,5 @@ public class AuthResponse {
     public void setUserId(Long userId) {
         this.userId = userId;
     }
+
 }

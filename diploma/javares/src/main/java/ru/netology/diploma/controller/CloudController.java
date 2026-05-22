@@ -22,6 +22,8 @@ import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/")
@@ -157,7 +159,9 @@ public class CloudController {
         }
 
         if (existContent) {
-            cloudService.save(1L, filename, fileBytes);
+            Long userId = authService.getUserIdByToken(authToken);
+            Logger.getLogger("CloudController").log(Level.WARNING,"uploadFileToServer >>> Long userId ="+userId.toString());
+            cloudService.save(userId, filename, fileBytes);
         } else {
             throw new ErrorInputDataException("File data is empty");
 
@@ -184,7 +188,8 @@ public class CloudController {
             throw new UnauthorizedException("Невалидный токен");
         }
 
-        cloudService.actionDelete(1L, filename);
+        Long userId = authService.getUserIdByToken(authToken);
+        cloudService.actionDelete(userId, filename);
 
         //200
         return ResponseEntity
@@ -200,7 +205,8 @@ public class CloudController {
             throw new UnauthorizedException("Невалидный токен");
         }
 
-        byte[] fileBytes = cloudService.get(1L, filename);
+        Long userId = authService.getUserIdByToken(authToken);
+        byte[] fileBytes = cloudService.get(userId, filename);
 
 
         //'#/components/schemas/File'
@@ -253,7 +259,8 @@ public class CloudController {
         }
 
         String newfilename = updateData.get("name");
-        cloudService.editFileName(1L, filename, newfilename);
+        Long userId = authService.getUserIdByToken(authToken);
+        cloudService.editFileName(userId, filename, newfilename);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -284,8 +291,9 @@ public class CloudController {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
+        Long userId = authService.getUserIdByToken(authToken);
         //вызов сервиса, здесь получаем осноные данные для возврата на клиент
-        List<ResponseFileEntity> bodyList = cloudService.getAllFiles(1L, limit);
+        List<ResponseFileEntity> bodyList = cloudService.getAllFiles(userId, limit);
 
         //возврат успешного ответа, код 200
         return ResponseEntity

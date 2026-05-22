@@ -50,9 +50,8 @@ public class TokenRepository {
         Long userId = userIdList.getFirst();
         authResponse.setUserId(userId);
         authResponse.setSuccAuth(true);
+
         return authResponse;
-
-
     }
 
     public void saveToken(Long userId, String userToken) {
@@ -60,12 +59,16 @@ public class TokenRepository {
     }
 
     public Optional<Long> findToken(String userToken) {
-
         return Optional.ofNullable(activeTokens.get(userToken));
-
     }
 
     public void deleteToken(String userToken) {
         activeTokens.remove(userToken);
+    }
+
+    public Long getUserIdByToken(String authToken) {
+        return activeTokens.get(authToken);
+
+
     }
 }
