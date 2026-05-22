@@ -76,19 +76,13 @@ public class CloudRepository {
         Integer rowAffected = 0;
         try {
             rowAffected = jdbcTemplate.update(sql, params);
-            //Logger.getLogger("TryDelete").log(Level.WARNING,"section-try");
         } catch (DataAccessException e) {
-            //Logger.getLogger("TryDelete").log(Level.WARNING,"section-cach-500");
-            throw new BaseDataAccessException(e.getMessage());
-            //return 500; //"Error delete file"
+            throw new BaseDataAccessException(e.getMessage()); // 500
         }
 
         if (rowAffected == 0) {
             ///without database error
-            throw new ErrorInputDataException("error input data");
-            //return 400; //"Error input data"
-//        } else {
-//            return 200; //"Success deleted"
+            throw new ErrorInputDataException("error input data"); // 400
         }
 
     }

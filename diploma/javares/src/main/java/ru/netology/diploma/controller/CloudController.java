@@ -113,7 +113,10 @@ public class CloudController {
 
 
         //проверить auth-token, если false тогда  401 - Unauthorized error
-
+        //проверяем токен
+        if (!authService.isValidToken(authToken)) {
+            throw new UnauthorizedException("Невалидный токен");
+        }
 
         Enumeration<String> headerNames = request.getHeaderNames();
 
@@ -162,7 +165,6 @@ public class CloudController {
 
         String hash = multipartRequest.getParameter("hash"); // а дальше что с ним делать? ;-)
 
-
         //200
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -177,32 +179,12 @@ public class CloudController {
         //401 - unathorized error
         //500 - error delete file
 
-        cloudService.actionDelete(1L, filename);
+        //проверяем токен
+        if (!authService.isValidToken(authToken)) {
+            throw new UnauthorizedException("Невалидный токен");
+        }
 
-//        ResponseEntity<?> response = null;
-//
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setContentType(MediaType.APPLICATION_JSON);
-//
-//        if (delResult == 200) {
-//            return ResponseEntity.ok().build();
-//
-//        } else if (delResult == 400) {
-//            //'#/components/schemas/Error'
-//            Map<String, ?> body = Map.of("message", "Error input data", "id", 1);
-//            response = new ResponseEntity<>(body, headers, HttpStatus.BAD_REQUEST);
-//
-//        } else if (delResult == 401) {
-//            //'#/components/schemas/Error'
-//            Map<String, ?> body = Map.of("message", "Unauthorized error", "id", 1);
-//            response = new ResponseEntity<>(body, headers, HttpStatus.UNAUTHORIZED);
-//
-//
-//        } else if (delResult == 500) {
-//            //'#/components/schemas/Error'
-//            Map<String, ?> body = Map.of("message", "Error delete file", "id", 1);
-//            response = new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
+        cloudService.actionDelete(1L, filename);
 
         //200
         return ResponseEntity
@@ -212,6 +194,11 @@ public class CloudController {
 
     @GetMapping("/file")
     public ResponseEntity<Resource> dowloadFileFromCloud(@RequestHeader("auth-token") String authToken, @RequestParam String filename) {
+
+        //проверяем токен
+        if (!authService.isValidToken(authToken)) {
+            throw new UnauthorizedException("Невалидный токен");
+        }
 
         byte[] fileBytes = cloudService.get(1L, filename);
 
@@ -259,6 +246,11 @@ public class CloudController {
         //'400': Error input data
         //'401': Unauthorized error
         //'500': Error Edit file name
+
+        //проверяем токен
+        if (!authService.isValidToken(authToken)) {
+            throw new UnauthorizedException("Невалидный токен");
+        }
 
         String newfilename = updateData.get("name");
         cloudService.editFileName(1L, filename, newfilename);
