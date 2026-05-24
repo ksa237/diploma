@@ -10,8 +10,8 @@ import ru.netology.diploma.dto.ErrorEntity;
 @RestControllerAdvice
 public class ExceptionApiHandler {
 
+    //класс, описывающий доступ ко всем видам наших исключений, идея взята из
     //https://struchkov.dev/blog/ru/exception-handling-controlleradvice/#
-
 
     @ExceptionHandler(BaseIOException.class)
     public ResponseEntity<ErrorEntity> baseIOException(BaseIOException exception) {

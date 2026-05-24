@@ -10,6 +10,10 @@ import ru.netology.diploma.exception.ErrorInputDataException;
 
 import java.util.List;
 
+//класс выполнения операций с базой данных: добавление файла пользователя , получени списка всех файлов пользователя
+// сохранения файла пользователя  в БД, удаление файла пользователя, получение (скачивание) файла пользователя
+// изменения имени файла пользователя
+
 @Repository
 public class CloudRepository {
 
@@ -36,23 +40,13 @@ public class CloudRepository {
 
             return answ;
         });
-        //Logger.getLogger("getAllFiles, repository").log(Level.INFO,answerList.toString() );
 
-        //if (!answerList.isEmpty()) {
         return answerList;
-        //} else {
-        //    throw new EmptyListOfFilesException("Список файлов для пользователя пуст");
-        //}
 
     }
 
     public void save(Long userId, String filename, byte[] fileBytes) {
 
-//        Map<String, Serializable> params = Map.of(
-//                "userid", userId,
-//                "filename", filename,
-//                "filedata", fileBytes
-//        );
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userid", userId)
