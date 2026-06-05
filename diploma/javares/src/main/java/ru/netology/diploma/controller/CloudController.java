@@ -47,7 +47,7 @@ public class CloudController {
     // также предусматривается проверка валидности токена, например
     // выдачу, проверку, хранение, удаление токена предусматривается в специальном классем TokenRepository
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> authorizationMethod(@RequestBody Map<String, String> authData) throws IOException {
+    public ResponseEntity<Map<String, String>> authorizationMethod(@RequestBody Map<String, String> authData) {
 
         //только здесь в запросе придодит json структура с именем пользоввателя и паролем, извлекаем стуктуру из запроса (веб)
         //отправляем в бд на пердмет проверки существоввания такого пользователя и правильности пароля.

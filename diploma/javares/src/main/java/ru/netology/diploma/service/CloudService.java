@@ -1,5 +1,6 @@
 package ru.netology.diploma.service;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import ru.netology.diploma.dto.ResponseFileEntity;
 import ru.netology.diploma.repository.CloudRepository;
@@ -11,8 +12,14 @@ public class CloudService {
 
     private final CloudRepository cloudRepository;
 
-    public CloudService(CloudRepository cloudRepository) {
+    /// тестирование контекста приложения
+    private final ApplicationContext context;
+
+    public CloudService(CloudRepository cloudRepository
+            , ApplicationContext context /// тестирование контекста приложения
+    ) {
         this.cloudRepository = cloudRepository;
+        this.context = context; /// тестирование контекста приложения
     }
 
     public List<ResponseFileEntity> getAllFiles(Long userId, Integer limit) {
