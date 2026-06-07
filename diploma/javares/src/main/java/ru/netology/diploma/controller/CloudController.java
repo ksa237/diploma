@@ -39,7 +39,6 @@ public class CloudController {
         this.authService = authService;
     }
 
-    /// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //++ scope AuthController
     // в данной области кода выполняется извлечение логина и пароля пришедшего в запросе
     // проверка авторизационных данных по базе пользователей - нужно обратиться в репозиторий
@@ -103,9 +102,6 @@ public class CloudController {
 
     }
     //-- scope AuthController
-
-    /// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
     @PostMapping("/file")
     public ResponseEntity<String> uploadFileToServer(@RequestHeader("auth-token") String authToken, @RequestParam String filename, HttpServletRequest request) {
@@ -202,7 +198,7 @@ public class CloudController {
     public ResponseEntity<String> deleteFile(@RequestHeader("auth-token") String authToken, @RequestParam String filename) {
 
         //400 - error input data
-        //401 - unathorized error
+        //401 - unauthorized error
         //500 - error delete file
 
         //проверяем токен

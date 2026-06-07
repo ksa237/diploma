@@ -43,14 +43,14 @@ public class ExceptionApiHandler {
     @ExceptionHandler(BaseDataAccessException.class)
     public ResponseEntity<ErrorEntity> dataAccessException(BaseDataAccessException exception) {
         return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .status(HttpStatus.INTERNAL_SERVER_ERROR) //500
                 .body(new ErrorEntity(exception.getMessage(),1));
     }
 
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ErrorEntity> unauthorizedException(UnauthorizedException exception){
         return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
+                .status(HttpStatus.UNAUTHORIZED) //401
                 .body(new ErrorEntity(exception.getMessage(), 1));
     }
 

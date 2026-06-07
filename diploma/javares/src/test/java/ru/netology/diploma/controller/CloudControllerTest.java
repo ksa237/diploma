@@ -1,6 +1,5 @@
 package ru.netology.diploma.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -8,7 +7,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.netology.diploma.exception.BadCredentialsException;
-import ru.netology.diploma.exception.UnauthorizedException;
 import ru.netology.diploma.service.AuthService;
 
 import java.util.HashMap;
@@ -16,7 +14,6 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 
 @SpringBootTest
@@ -25,12 +22,6 @@ class CloudControllerTest {
 
     @Mock
     AuthService authServiceMock;
-
-    @Mock
-    HttpServletRequest requestMock;
-
-    @Mock
-    CloudController cloudControllerMock;
 
     @InjectMocks
     CloudController cloudController;
@@ -45,24 +36,11 @@ class CloudControllerTest {
 
         Throwable exception =
                 assertThrows(BadCredentialsException.class, () -> {
-            cloudController.authorizationMethod(authDataBad);
-        });
+                    cloudController.authorizationMethod(authDataBad);
+                });
 
         assertEquals("Неправильные имя пользователя или пароль", exception.getMessage());
 
-
     }
 
-    @Test
-    void uploadFileToServer_return_exeption_unauthorized() {
-
-        doThrow(new UnauthorizedException("Невалидный токен")).when(cloudControllerMock).uploadFileToServer("test_token", "test_filename", requestMock);
-
-        Throwable exception = assertThrows(UnauthorizedException.class, () -> {
-            cloudControllerMock.uploadFileToServer("test_token","test_filename", requestMock);
-        });
-
-        assertEquals("Невалидный токен", exception.getMessage());
-
-    }
 }
