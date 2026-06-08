@@ -9,9 +9,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class CloudConfigSecurity {
 
 
-    //здесь настраивается конфигурация безопасности SpringSecurity через установку фильтров безопасности
-    //
-
+    ///здесь настраивается конфигурация безопасности SpringSecurity через установку фильтров безопасности
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http

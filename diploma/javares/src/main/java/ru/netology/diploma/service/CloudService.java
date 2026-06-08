@@ -1,6 +1,5 @@
 package ru.netology.diploma.service;
 
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import ru.netology.diploma.dto.ResponseFileEntity;
 import ru.netology.diploma.repository.CloudRepository;
@@ -12,14 +11,8 @@ public class CloudService {
 
     private final CloudRepository cloudRepository;
 
-    /// тестирование контекста приложения
-    private final ApplicationContext context;
-
-    public CloudService(CloudRepository cloudRepository
-            , ApplicationContext context /// тестирование контекста приложения
-    ) {
+    public CloudService(CloudRepository cloudRepository) {
         this.cloudRepository = cloudRepository;
-        this.context = context; /// тестирование контекста приложения
     }
 
     public List<ResponseFileEntity> getAllFiles(Long userId, Integer limit) {
@@ -32,7 +25,6 @@ public class CloudService {
 
     public void actionDelete(Long userId, String filename) {
         cloudRepository.actionDelete(userId, filename);
-
     }
 
     public byte[] get(long userId, String filename) {
@@ -40,8 +32,6 @@ public class CloudService {
     }
 
     public void editFileName(long userId, String filename, String newfilename) {
-
         cloudRepository.editFileName(userId, filename, newfilename);
-
     }
 }

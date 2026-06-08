@@ -10,10 +10,9 @@ import ru.netology.diploma.exception.ErrorInputDataException;
 
 import java.util.List;
 
-//класс выполнения операций с базой данных: добавление файла пользователя , получени списка всех файлов пользователя
-// сохранения файла пользователя  в БД, удаление файла пользователя, получение (скачивание) файла пользователя
-// изменения имени файла пользователя
-
+/// класс выполнения операций с базой данных: добавление файла пользователя , получени списка всех файлов пользователя
+/// сохранения файла пользователя  в БД, удаление файла пользователя, получение (скачивание) файла пользователя
+/// изменения имени файла пользователя
 @Repository
 public class CloudRepository {
 
@@ -31,15 +30,23 @@ public class CloudRepository {
 
         String sql = "SELECT filename, octet_length(filedata) AS size FROM public.userfiles WHERE userid = :userid LIMIT :limit";
 
-        List<ResponseFileEntity> answerList = jdbcTemplate.query(sql, params, (rs, rowNum) -> {
+        List<ResponseFileEntity> answerList;
 
-            String filename = rs.getString("filename");
-            Integer size = rs.getInt("size");
+        try {
 
-            ResponseFileEntity answ = new ResponseFileEntity(filename, size);
+            answerList = jdbcTemplate.query(sql, params, (rs, rowNum) -> {
 
-            return answ;
-        });
+                String filename = rs.getString("filename");
+                Integer size = rs.getInt("size");
+
+                ResponseFileEntity answ = new ResponseFileEntity(filename, size);
+
+                return answ;
+            });
+
+        } catch (DataAccessException e) {
+            throw new BaseDataAccessException(e.getMessage()); // 500
+        }
 
         return answerList;
 
@@ -53,8 +60,13 @@ public class CloudRepository {
                 .addValue("filename", filename)
                 .addValue("filedata", fileBytes);
 
-        String sql = "INSERT INTO public.userfiles (userid, filename, filedata) VALUES (:userid, :filename, :filedata)";
-        jdbcTemplate.update(sql, params);
+        try {
+            String sql = "INSERT INTO public.userfiles (userid, filename, filedata) VALUES (:userid, :filename, :filedata)";
+            jdbcTemplate.update(sql, params);
+        } catch (DataAccessException e) {
+            throw new BaseDataAccessException(e.getMessage());
+        }
+
 
     }
 
@@ -89,18 +101,27 @@ public class CloudRepository {
 
         String sql = "SELECT filedata FROM public.userfiles WHERE userid = :userid AND filename = :filename LIMIT 1";
 
-        List<byte[]> answerList = jdbcTemplate.query(sql, params, (rs, rowNum) -> {
+        List<byte[]> answerList;
 
-            byte[] answ = rs.getBytes("filedata");
-            return answ;
-        });
+        try {
 
-        return answerList.get(0);
-//        if(!answerList.isEmpty()){
-//            return answerList.getFirst();
-//        } else {
-//            return new Exception(e.)
-//        }
+            answerList = jdbcTemplate.query(sql, params, (rs, rowNum) -> {
+
+                byte[] answ = rs.getBytes("filedata");
+                return answ;
+            });
+
+        } catch (DataAccessException e) {
+            throw new BaseDataAccessException(e.getMessage()); // 500
+        }
+
+
+        if (!answerList.isEmpty()) {
+            return answerList.getFirst();
+        } else {
+            throw new ErrorInputDataException("error input data"); //400
+        }
+
     }
 
     public void editFileName(long userId, String filename, String newfilename) {
