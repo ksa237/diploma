@@ -75,6 +75,21 @@ class CloudRepositoryTest {
         assertThat(rowAffected).isEqualTo(1);
 
     }
+
+    @Test
+    void save_test() {
+
+        Long testUserId = 3L;
+        String testFilename = "java_tutorial2.rtf";
+        byte[] testFileBytes = "bytes_from_file: java_tutorial2.rtf".getBytes();
+        String sql = "INSERT INTO public.userfiles (userid, filename, filedata) VALUES (?, ?, ?)";
+        Integer rowAffected = jdbcTemplate.update(sql, testUserId, testFilename, testFileBytes);
+
+        assertThat(rowAffected).isEqualTo(1);
+
+    }
+
+
 }
 
 class FileEntityTest {
@@ -101,4 +116,5 @@ class FileEntityTest {
     public void setSize(Long size) {
         this.size = size;
     }
+
 }

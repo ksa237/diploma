@@ -2,8 +2,11 @@ package ru.netology.diploma.service;
 
 import org.springframework.stereotype.Service;
 import ru.netology.diploma.dto.ResponseFileEntity;
+import ru.netology.diploma.model.ResponseFile;
 import ru.netology.diploma.repository.CloudRepository;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 @Service
@@ -16,7 +19,19 @@ public class CloudService {
     }
 
     public List<ResponseFileEntity> getAllFiles(Long userId, Integer limit) {
-        return cloudRepository.getAllFiles(userId, limit);
+
+        List<ResponseFile> answerList = cloudRepository.getAllFiles(userId, limit); //объект из репозитория, содержит максимум полей БД
+        List<ResponseFileEntity> answerListDTO = new ArrayList<>(); //список сущностей DTO, набор полей необходимых только для клиента
+
+        Iterator<ResponseFile> iterator = answerList.iterator();
+        while (iterator.hasNext()) {
+            ResponseFile elementDB = iterator.next();
+            ResponseFileEntity elementDTO = new ResponseFileEntity(elementDB.getFilename(), elementDB.getSize());
+            answerListDTO.add(elementDTO);
+        }
+
+        return answerListDTO;
+
     }
 
     public void save(Long userId, String filename, byte[] fileBytes) {

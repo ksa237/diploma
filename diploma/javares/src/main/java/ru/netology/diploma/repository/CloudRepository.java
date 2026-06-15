@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import ru.netology.diploma.dto.ResponseFileEntity;
 import ru.netology.diploma.exception.BaseDataAccessException;
 import ru.netology.diploma.exception.ErrorInputDataException;
+import ru.netology.diploma.model.ResponseFile;
 
 import java.util.List;
 
@@ -22,15 +23,15 @@ public class CloudRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public List<ResponseFileEntity> getAllFiles(Long userId, Integer limit) {
+    public List<ResponseFile> getAllFiles(Long userId, Integer limit) {
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("userid", userId)
                 .addValue("limit", limit);
 
-        String sql = "SELECT filename, octet_length(filedata) AS size FROM public.userfiles WHERE userid = :userid LIMIT :limit";
+        String sql = "SELECT userid, filename, octet_length(filedata) AS size FROM public.userfiles WHERE userid = :userid LIMIT :limit";
 
-        List<ResponseFileEntity> answerList;
+        List<ResponseFile> answerList;
 
         try {
 
@@ -38,8 +39,10 @@ public class CloudRepository {
 
                 String filename = rs.getString("filename");
                 Integer size = rs.getInt("size");
+                Long usId = rs.getLong("userid");
 
-                ResponseFileEntity answ = new ResponseFileEntity(filename, size);
+                //сущность которая соответствует слою репозитория, получена из БД, содержит большое кол-во полей.
+                ResponseFile answ = new ResponseFile(filename, size, usId);
 
                 return answ;
             });
